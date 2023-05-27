@@ -16,18 +16,18 @@ class MicrophoneListener:
             model = Model(lang="pl")
 
             with sd.RawInputStream(samplerate=samplerate, blocksize = 8000, device=None, dtype="int16", channels=1, callback=self.callback):
-                rec = KaldiRecognizer(model, samplerate)
+                recognizer = KaldiRecognizer(model, samplerate)
                 begin_date = None
                 while True:
                     current_date = time.localtime()
                     
-                    if rec.AcceptWaveform(self.queue.get()):
-                        text = ast.literal_eval(rec.Result())["text"]
+                    if recognizer.AcceptWaveform(self.queue.get()):
+                        text = ast.literal_eval(recognizer.Result())["text"]
                         if text:
                             sys.stdout.write(f'\r{self.format_date(begin_date)} - {self.format_date(current_date)}: {text}\n')
                             begin_date = None
                     else:
-                        text = ast.literal_eval(rec.PartialResult())["partial"]
+                        text = ast.literal_eval(recognizer.PartialResult())["partial"]
 
                         begin_date = current_date if not begin_date or not text else begin_date
                         sys.stdout.write(f'\r{self.format_date(begin_date)} - {self.format_date(current_date)}: {text}')
